@@ -18,14 +18,14 @@ The project is built using **Node.js** with **NestJS**, and integrates authentic
 
 ## 🚀 Tech Stack
 
-* **Node.js** (>= 18.x)
-* **Yarn** (>= 1.22.x)
-* **NestJS**
-* **Mongoose** (MongoDB ODM)
-* **MongoDB Atlas**
-* **Passport.js** (authentication middleware)
-* **JWT** (JSON Web Token for auth)
-* **Jest** (unit & integration testing)
+- **Node.js** (>= 18.x)
+- **Yarn** (>= 1.22.x)
+- **NestJS**
+- **Mongoose** (MongoDB ODM)
+- **MongoDB Atlas**
+- **Passport.js** (authentication middleware)
+- **JWT** (JSON Web Token for auth)
+- **Jest** (unit & integration testing)
 
 ---
 
@@ -77,13 +77,12 @@ Deployment is handled via **GitHub Actions pipelines** with AWS.
 
 ### Requirements
 
-* An AWS machine (EC2 or similar) with a configured user (e.g., `root`).
-* SSH key pair (private key stored in GitHub secrets, public key added to the server).
-* GitHub repository secrets configured:
-
-  * `AWS_USER` → your AWS machine username (e.g., `root`)
-  * `AWS_HOST` → your AWS machine IP or domain (e.g., `197.155.14.5`)
-  * `DEPLOY_KEY` → private SSH key for deployment
+- An AWS machine (EC2 or similar) with a configured user (e.g., `root`).
+- SSH key pair (private key stored in GitHub secrets, public key added to the server).
+- GitHub repository secrets configured:
+  - `AWS_USER` → your AWS machine username (e.g., `root`)
+  - `AWS_HOST` → your AWS machine IP or domain (e.g., `197.155.14.5`)
+  - `DEPLOY_KEY` → private SSH key for deployment
 
 ### Steps
 
@@ -96,13 +95,21 @@ Deployment is handled via **GitHub Actions pipelines** with AWS.
    Add your `.env` file inside this directory with all required environment variables.
 
 2. Add the following secrets to your GitHub repository:
-
-   * `AWS_USER`
-   * `AWS_HOST`
-   * `DEPLOY_KEY`
+   - `AWS_USER`
+   - `AWS_HOST`
+   - `DEPLOY_KEY`
 
 3. On push to the main branch, the GitHub Actions pipeline will:
+   - Build the project
+   - Connect to the AWS machine
+   - Deploy the latest version into `~/easy-task`
 
-   * Build the project
-   * Connect to the AWS machine
-   * Deploy the latest version into `~/easy-task`
+🌍 Deployment
+
+The backend is deployed and accessible at:
+👉 http://51.20.246.245:4200
+
+📑 API Documentation
+
+The API is fully documented using Swagger and can be accessed here:
+👉 http://51.20.246.245:4200/api-docs
