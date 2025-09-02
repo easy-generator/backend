@@ -87,8 +87,8 @@ export class UsersService {
     }
 
     return {
-      user: this.serializeUser(user),
       token: await this.jwtService.signAsync({ userId: user.id }),
+      user: this.serializeUser(user),
     };
   }
 

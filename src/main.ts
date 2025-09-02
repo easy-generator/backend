@@ -8,7 +8,17 @@ dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    credentials: false,
+  });
+
+  app.setGlobalPrefix(process.env.PREFIX ?? 'api/v1');
+
   app.useGlobalPipes(new ValidationPipe());
+
   const config = new DocumentBuilder()
     .setTitle('Easy Generator Task')
     .setDescription('This is a task for the easy generator hiring process')

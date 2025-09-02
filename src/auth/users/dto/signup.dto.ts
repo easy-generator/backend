@@ -1,6 +1,7 @@
 import { IsEmail, IsNotEmpty, IsString } from '@nestjs/class-validator';
 import { IsStrongPassword } from 'src/utils/strong-password.decorator';
 import { ApiProperty } from '@nestjs/swagger';
+import { MinLength } from 'class-validator';
 
 export class SignupDto {
   @ApiProperty({
@@ -10,6 +11,7 @@ export class SignupDto {
     maxLength: 50,
   })
   @IsNotEmpty()
+  @MinLength(3)
   @IsString()
   name: string;
 

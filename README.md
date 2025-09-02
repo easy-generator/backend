@@ -110,3 +110,4 @@ The backend is deployed and accessible at:
 
 The API is fully documented using Swagger and can be accessed here:
 👉 http://51.20.246.245:4200/api-docs
+GLOBAL PREFIX = api/v1
