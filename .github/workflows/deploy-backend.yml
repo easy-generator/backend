@@ -1,0 +1,98 @@
+name: Deploy Backend to Cloud
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**'
+      - '!.github/workflows/**'
+      - '.github/workflows/deploy-backend.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+          cache: 'yarn'
+          cache-dependency-path: yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build application
+        run: yarn build
+
+      - name: Set up SSH
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.DEPLOY_KEY  }}
+          if_key_exists: replace
+          known_hosts: unnecessary
+          config: |
+            Host *
+              StrictHostKeyChecking no
+              UserKnownHostsFile /dev/null
+
+      - name: Create deployment bundle
+        run: |
+          mkdir -p deployment
+          cp -r dist deployment/
+          cp -r node_modules deployment/
+          cp package.json deployment/
+          cp yarn.lock deployment/
+          cp ecosystem.config.js deployment/ || echo "// PM2 Configuration
+          module.exports = {
+            apps: [{
+              name: 'easy-task-backend',
+              script: 'dist/main.js',
+              instances: 1,
+              exec_mode: 'cluster',
+              autorestart: true,
+              watch: false,
+              max_memory_restart: '2G',
+              env: {
+                NODE_ENV: 'production',
+              }
+            }]
+          };" > deployment/ecosystem.config.js
+          tar -czf deployment.tar.gz -C deployment .
+
+      - name: Deploy to Digital Ocean
+        run: |
+          # Transfer files
+          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deployment.tar.gz ${{ secrets.AWS_USER  }}@${{ secrets.AWS_HOST  }}:~/easy-task-backend-temp.tar.gz
+
+          # Execute deployment commands
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.AWS_USER  }}@${{ secrets.AWS_HOST  }} << 'ENDSSH'
+            # Create backup of current deployment
+            if [ -d "~/easy-task" ]; then
+              timestamp=$(date +%Y%m%d%H%M%S)
+              mkdir -p ~/backups
+              tar -czf ~/backups/easy-task-backend-$timestamp.tar.gz -C ~/easy-task .
+            fi
+            
+            # Prepare deployment directory
+            mkdir -p ~/easy-task
+            
+            # Extract new deployment
+            tar -xzf ~/easy-task-backend-temp.tar.gz -C ~/easy-task
+            rm ~/easy-task-backend-temp.tar.gz
+
+            # Restart the application with PM2
+             cd ~/easy-task
+            if pm2 list | grep -q "goerp-backend"; then
+              pm2 reload goerp-backend
+            else
+              pm2 start ecosystem.config.js
+            fi
+            
+            # Save PM2 configuration
+            pm2 save
+          ENDSSH

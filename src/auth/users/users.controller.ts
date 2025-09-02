@@ -23,11 +23,16 @@ import { SigninDto } from './dto/signin.dto';
 import { UserResponseDto, LoginResponseDto } from './dto/user-response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
+import { LoggingService } from 'src/logging/logging.service';
+import { Services } from 'src/logging/enums/services.enums';
 
 @ApiTags('Users')
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly loggingService: LoggingService,
+  ) {}
 
   @Post('signup')
   @ApiOperation({
@@ -39,6 +44,10 @@ export class UsersController {
     description: 'User registration data',
   })
   async signup(@Body() signupDto: SignupDto): Promise<UserResponseDto> {
+    await this.loggingService.createLog('User signup', {
+      body: signupDto,
+      service: Services.USERS,
+    });
     const user = await this.usersService.signup(signupDto);
     return {
       id: user.id,
@@ -57,6 +66,10 @@ export class UsersController {
     description: 'User login credentials',
   })
   async signin(@Body() signinDto: SigninDto): Promise<LoginResponseDto> {
+    await this.loggingService.createLog('User login', {
+      body: signinDto,
+      service: Services.USERS,
+    });
     return await this.usersService.login(signinDto.email, signinDto.password);
   }
 
@@ -68,7 +81,11 @@ export class UsersController {
     description:
       'Retrieve a list of all registered users (requires authentication)',
   })
-  async findAll(): Promise<UserResponseDto[]> {
+  async findAll(@Req() req: Request): Promise<UserResponseDto[]> {
+    await this.loggingService.createLog('User find all', {
+      service: Services.USERS,
+      userId: req.user?.['id'],
+    });
     const users = await this.usersService.findAll();
     return users;
   }
@@ -77,6 +94,10 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   async getMe(@Req() req: Request) {
+    await this.loggingService.createLog('User get me', {
+      service: Services.USERS,
+      userId: req.user?.['id'],
+    });
     return await this.usersService.findById(req.user?.['id']);
   }
 
@@ -93,7 +114,15 @@ export class UsersController {
     description: 'User unique identifier',
     example: '507f1f77bcf86cd799439011',
   })
-  async findById(@Param('id') id: string): Promise<UserResponseDto> {
+  async findById(
+    @Param('id') id: string,
+    @Req() req: Request,
+  ): Promise<UserResponseDto> {
+    await this.loggingService.createLog('User get by id', {
+      service: Services.USERS,
+      body: { id },
+      userId: req.user?.['id'],
+    });
     const user = await this.usersService.findById(id);
     return user;
   }

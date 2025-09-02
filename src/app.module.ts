@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
+import { LoggingModule } from './logging/logging.module';
 
 
 @Module({
@@ -13,6 +14,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     MongooseModule.forRoot(String(new ConfigService().get('MONGO_URI'))),
     AuthModule,
+    LoggingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
