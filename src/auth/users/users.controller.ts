@@ -77,7 +77,6 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   async getMe(@Req() req: Request) {
-    console.log(req.user);
     return await this.usersService.findById(req.user?.['id']);
   }
 

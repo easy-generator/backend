@@ -6,8 +6,8 @@ import { User, UserSchema } from './schemas/users.schema';
 import { UsersRepository } from './users.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from '../jwt-strategy/jwt-strategy.service';
 import * as dotenv from 'dotenv';
+import { UserResponseDto } from './dto/user-response.dto';
 
 dotenv.config();
 
@@ -21,7 +21,7 @@ dotenv.config();
       signOptions: { expiresIn: '100h' },
     }),
   ],
-  providers: [UsersService, UsersRepository, JwtStrategy],
-  exports: [UsersService],
+  providers: [UsersService, UsersRepository],
+  exports: [UsersService, UsersRepository],
 })
 export class UsersModule {}
